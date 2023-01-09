@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.name }}
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.name }}
+    spec:
+      containers:
+      {{ if .Values.production }}
+      - image: {{ .Values.acr.uri | default (.Files.Get "dynamic/acr-prod" | trim) }}/{{ .Values.acr.image }}:{{ .Values.acr.tag | default (.Files.Get "dynamic/tag-prod" | trim) }}
+      {{ else }}
+      - image: {{ .Values.acr.uri | default (.Files.Get "dynamic/tag-dev" | trim) }}/{{ .Values.acr.image }}:{{ .Values.acr.tag | default (.Files.Get "dynamic/tag-dev" | trim) }}
+      {{ end }}
+        name: {{ .Values.deployment.container.name }}
+        imagePullPolicy: {{ .Values.acr.pull }}        
+        ports:
+          - containerPort: {{ .Values.deployment.container.port }}
+        envFrom:
+          - configMapRef:
+              name: {{ .Values.name }}
+

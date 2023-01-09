@@ -1,0 +1,18 @@
+production: false
+namespace: demoapp
+name: demoapp
+svcname: demoapp-svc
+env:
+  HTTP_ADDR: :8080
+acr:
+  uri: ""
+  image: demoapp
+  tag: ""
+  pull: Always
+deployment:
+  container:
+    name: go
+    port: 8080
+service:
+  type: LoadBalancer
+  port: 80
