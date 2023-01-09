@@ -6,6 +6,14 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
     inputs:
+      environment:
+        required: true
+        description: "argoCD app environment"
+        type: choice
+        default: "dev"
+        options:
+          - "dev"
+          - "prod"
       name:
         type: string
         description: "ArgoCD App name"
@@ -22,21 +30,11 @@ permissions:
   id-token: write # This is required for requesting the JWT
   contents: read  # This is required for actions/checkout
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
-jobs:
-  Setup_Job:
-    runs-on: ubuntu-latest
-    outputs:
-      output_env: ${{ steps.getvariable.outputs.fromenv }}
-    steps:
-      - name: getvariable
-        id: getvariable      
-        run: |
-          echo "fromenv=${{ env.ENVIRONMENT_NAME }}" >> $GITHUB_OUTPUT
+jobs:  
   Deploy_DemoApp:    
-    runs-on: ubuntu-latest    
-    needs: [Setup_Job]        
+    runs-on: ubuntu-latest        
     environment: 
-      name: '${{ github.event.inputs.name }}_${{ needs.Setup_Job.outputs.output_env }}' 
+      name: '${{ github.event.inputs.name }}_${{ github.event.inputs.environment }}' 
       url: ${{ steps.argoapp.outputs.url }}   
     steps:  
     - name: Checkout source code 
@@ -56,6 +54,6 @@ jobs:
     - name: Deploy ArgoCD DemoApp
       id: argoapp
       run: |
-        kubectl apply -n argocd -f ./argoCD-apps/demo-app/argocd-app-${{ needs.Setup_Job.outputs.output_env }}.yaml        
+        kubectl apply -n argocd -f ./argoCD-apps/demo-app/argocd-app-${{ github.event.inputs.environment }}.yaml        
         sleep 30
         echo "url=http://$(kubectl get svc ${{ github.event.inputs.name }}-svc -n ${{ github.event.inputs.name }}  -o jsonpath='{.status.loadBalancer.ingress[0].ip}')" >> $GITHUB_OUTPUT          
