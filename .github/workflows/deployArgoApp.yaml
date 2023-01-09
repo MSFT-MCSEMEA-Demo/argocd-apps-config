@@ -1,6 +1,4 @@
 name: DemoApp Deployment
-env:    
-  ENVIRONMENT_NAME: "${{ github.ref == 'refs/heads/dev' && 'dev' || 'prod' }}"
 # Controls when the action will run. 
 on:
   # Allows you to run this workflow manually from the Actions tab
@@ -17,15 +15,7 @@ on:
       name:
         type: string
         description: "ArgoCD App name"
-        default: "demoapp"
-      resource_group:
-        type: string
-        description: "Resource Group name"
-        default: "ypdemodev-rg"
-      aks_name:
-        type: string
-        description: "AKS name"
-        default: "ypdemodev-aks"   
+        default: "demoapp"    
 permissions:
   id-token: write # This is required for requesting the JWT
   contents: read  # This is required for actions/checkout
@@ -45,12 +35,22 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    - name: Get Resource Group and AKS names
+      id: getrgaks
+      run: |
+        if [[ '${{ github.event.inputs.environment }}' == 'dev' ]]; then
+          echo "rgname=$(cat helm/demo-app/dynamic/rg-dev)" >> $GITHUB_OUTPUT 
+          echo "aksname=$(cat helm/demo-app/dynamic/aks-dev)" >> $GITHUB_OUTPUT        
+        else
+          echo "rgname=$(cat helm/demo-app/dynamic/rg-prod)" >> $GITHUB_OUTPUT 
+          echo "aksname=$(cat helm/demo-app/dynamic/aks-prod)" >> $GITHUB_OUTPUT        
+        fi    
     - name: Set AKS context
       id: set-context
       uses: azure/aks-set-context@v3
-      with:
-        resource-group: '${{ github.event.inputs.resource_group }}' 
-        cluster-name: '${{ github.event.inputs.aks_name }}'
+      with: 
+        resource-group: '${{ steps.getrgaks.outputs.rgname }}' 
+        cluster-name: '${{ steps.getrgaks.outputs.aksname }}'
     - name: Deploy ArgoCD DemoApp
       id: argoapp
       run: |
