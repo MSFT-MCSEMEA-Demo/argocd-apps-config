@@ -15,8 +15,7 @@ spec:
     path: helm/demo-app
     repoURL: https://github.com/MSFT-MCSEMEA-Demo/argocd-apps-config
     targetRevision: main
-  syncPolicy: 
-    automated:
-      prune: true
-      allowEmpty: true
-      selfHeal: true  
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true  
