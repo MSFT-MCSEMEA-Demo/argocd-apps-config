@@ -14,7 +14,7 @@ spec:
         - dev.yaml
     path: helm/demo-app
     repoURL: https://github.com/MSFT-MCSEMEA-Demo/argocd-apps-config
-    targetRevision: dev
+    targetRevision: main
   syncPolicy: 
     automated:
       prune: true
