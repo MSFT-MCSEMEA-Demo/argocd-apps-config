@@ -39,11 +39,11 @@ jobs:
       id: getrgaks
       run: |
         if [[ '${{ github.event.inputs.environment }}' == 'dev' ]]; then
-          echo "rgname=$(cat helm/demo-app/dynamic/rg-dev)" >> $GITHUB_OUTPUT 
-          echo "aksname=$(cat helm/demo-app/dynamic/aks-dev)" >> $GITHUB_OUTPUT        
+          echo "rgname=$(cat global/rg-dev)" >> $GITHUB_OUTPUT 
+          echo "aksname=$(cat global/aks-dev)" >> $GITHUB_OUTPUT        
         else
-          echo "rgname=$(cat helm/demo-app/dynamic/rg-prod)" >> $GITHUB_OUTPUT 
-          echo "aksname=$(cat helm/demo-app/dynamic/aks-prod)" >> $GITHUB_OUTPUT        
+          echo "rgname=$(cat global/rg-prod)" >> $GITHUB_OUTPUT 
+          echo "aksname=$(cat global/aks-prod)" >> $GITHUB_OUTPUT        
         fi    
     - name: Set AKS context
       id: set-context
